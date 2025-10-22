@@ -51,7 +51,7 @@ func NewClient(options *ClientOptions) *Client {
 	client := &Client{
 		ClientOptions: options,
 		http:          cleanhttp.DefaultClient(),
-		sr:            syncretry.NewSyncRetry(&syncretry.Options{Delays: []int{1, 5, 15, 30, 50}}),
+		sr:            syncretry.NewSyncRetry(&syncretry.Options{Delays: []int{5, 15, 30, 50}}),
 	}
 
 	if options.UseSandbox {
