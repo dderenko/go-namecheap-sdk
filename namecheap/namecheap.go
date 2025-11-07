@@ -114,7 +114,7 @@ func (c *Client) DoXML(body map[string]string, obj interface{}) (*http.Response,
 		if err != nil {
 			c.ClientOptions.Logger.Error("namecheap couldn't dump request", field.Error(err))
 		} else {
-			c.ClientOptions.Logger.Error("namecheap dump request", field.RawBytes(reqDump))
+			c.ClientOptions.Logger.Info("namecheap dump request", field.RawBytes(reqDump))
 		}
 
 		response, err := c.http.Do(request)
@@ -127,7 +127,7 @@ func (c *Client) DoXML(body map[string]string, obj interface{}) (*http.Response,
 		if err != nil {
 			c.ClientOptions.Logger.Error("namecheap couldn't dump response", field.Error(err))
 		} else {
-			c.ClientOptions.Logger.Error("namecheap dump response", field.RawBytes(respDump))
+			c.ClientOptions.Logger.Info("namecheap dump response", field.RawBytes(respDump))
 		}
 
 		if response.StatusCode == 405 {
