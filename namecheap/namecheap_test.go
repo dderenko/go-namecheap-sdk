@@ -27,11 +27,7 @@ func setupClient(httpClient *http.Client) *Client {
 		UseSandbox: false,
 
 		Logger: logger.NewNop(),
-	})
-
-	if httpClient != nil {
-		client.http = httpClient
-	}
+	}, httpClient)
 
 	return client
 }
@@ -53,7 +49,7 @@ func TestNewClient(t *testing.T) {
 			ApiKey:     ncAPIKey,
 			ClientIp:   ncClientIP,
 			UseSandbox: false,
-		})
+		}, nil)
 
 		assert.Equal(t, namecheapProductionAPIURL, client.BaseURL)
 	})
@@ -65,7 +61,7 @@ func TestNewClient(t *testing.T) {
 			ApiKey:     ncAPIKey,
 			ClientIp:   ncClientIP,
 			UseSandbox: true,
-		})
+		}, nil)
 
 		assert.Equal(t, namecheapSandboxAPIURL, client.BaseURL)
 	})
