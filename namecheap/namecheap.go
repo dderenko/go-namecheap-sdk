@@ -7,12 +7,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"regexp"
 	"strconv"
 
 	"github.com/hashicorp/go-cleanhttp"
 	"github.com/namecheap/go-namecheap-sdk/v2/namecheap/internal/syncretry"
+	"github.com/propellerads/logger"
+	"github.com/propellerads/logger/field"
 	"github.com/weppos/publicsuffix-go/publicsuffix"
 )
 
@@ -27,6 +30,8 @@ type ClientOptions struct {
 	ApiKey     string // nolint: stylecheck,revive
 	ClientIp   string // nolint: stylecheck,revive
 	UseSandbox bool
+
+	Logger *logger.Logger
 }
 
 type Client struct {
@@ -51,7 +56,7 @@ func NewClient(options *ClientOptions) *Client {
 	client := &Client{
 		ClientOptions: options,
 		http:          cleanhttp.DefaultClient(),
-		sr:            syncretry.NewSyncRetry(&syncretry.Options{Delays: []int{1, 5, 15, 30, 50}}),
+		sr:            syncretry.NewSyncRetry(&syncretry.Options{Delays: []int{5, 15, 30, 50}}),
 	}
 
 	if options.UseSandbox {
@@ -101,12 +106,28 @@ func (c *Client) DoXML(body map[string]string, obj interface{}) (*http.Response,
 	err := c.sr.Do(func() error {
 		request, err := c.NewRequest(body)
 		if err != nil {
+			c.ClientOptions.Logger.Error("namecheap couldn't form request", field.Error(err))
 			return err
+		}
+
+		reqDump, err := httputil.DumpRequestOut(request, true)
+		if err != nil {
+			c.ClientOptions.Logger.Error("namecheap couldn't dump request", field.Error(err))
+		} else {
+			c.ClientOptions.Logger.Info("namecheap dump request", field.RawBytes(reqDump))
 		}
 
 		response, err := c.http.Do(request)
 		if err != nil {
+			c.ClientOptions.Logger.Error("namecheap couldn't form response", field.Error(err))
 			return err
+		}
+
+		respDump, err := httputil.DumpResponse(response, true)
+		if err != nil {
+			c.ClientOptions.Logger.Error("namecheap couldn't dump response", field.Error(err))
+		} else {
+			c.ClientOptions.Logger.Info("namecheap dump response", field.RawBytes(respDump))
 		}
 
 		if response.StatusCode == 405 {

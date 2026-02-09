@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/propellerads/logger"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -24,6 +25,8 @@ func setupClient(httpClient *http.Client) *Client {
 		ApiKey:     ncAPIKey,
 		ClientIp:   ncClientIP,
 		UseSandbox: false,
+
+		Logger: logger.NewNop(),
 	})
 
 	if httpClient != nil {
